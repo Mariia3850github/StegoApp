@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Drawing;
 using System.Reflection.Emit;
@@ -96,9 +96,9 @@ namespace stego_app
         } // ChiSquarePval()
         private static double Exp(double x)
         {
-            //if (x < -40.0) // ACM update remark (8)
-            //    return 0.0;
-            //else
+            if (x < -40.0) // ACM update remark (8)
+                return 0.0;
+            else
                 return Math.Exp(x);
         }
         public static double Gauss(double z)
@@ -174,10 +174,6 @@ namespace stego_app
             double[] expected = ExpectedFromProbs(probs, sumObs);
             return ChiFromFreqs(observed, expected);
         }
-        private void Panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
 
         private void ButtonLoad_Click(object sender, EventArgs e)
         {
@@ -211,6 +207,8 @@ namespace stego_app
                     helloKey.SetValue("picname"+s_num, fname);
                     helloKey.Close();
 
+                    Text = open_dialog.FileName;
+
 
                 }
                 catch
@@ -219,11 +217,6 @@ namespace stego_app
                     "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private void PictureBox1_Click(object sender, EventArgs e)
-        {
-
         }
 
         private double Func(double x)
@@ -250,26 +243,25 @@ namespace stego_app
         {
             const int N = 128;
             double hi2=0;
+            int[] R = new int[N];
+            
             double[] ln = new double[N];
             double[] ln_ = new double[N];
-
-            for (int k = 0; k < N; k++)
+            Array.Clear(ln, 0, N);
+            Array.Clear(ln_, 0, N);
+            int off = 10;
+            for (int k = 0 + off; k < N - off; k++)
             {
-                ln[k] = (double)arr[2 * k+offset];
-                ln_[k] = ((double)arr[2 * k+offset] + (double) arr[2 * k + 1+offset]) / 2.0;
+                ln[k]  =  (double)arr[2 * k + offset];
+                ln_[k] = ((double)arr[2 * k + offset] + (double)arr[2 * k + 1 + offset]) / 2.0;
             }
-            for (int i = 0; i < N; i++)
+            for (int i = 0 + off; i < N - off; i++)
             {
                 if (ln_[i] != 0)
-                  hi2 += (ln[i] - ln_[i])* (ln[i] - ln_[i]) / (ln_[i]);
-               //     hi2 += (ln[i] - ln_[i]) * (ln[i] - ln_[i]) / (ln[i]>ln_[i]?ln[i]:ln_[i]);
+                    hi2 += (ln[i] - ln_[i]) * (ln[i] - ln_[i]) / ln_[i];
+
             }
-            //for (int i=0; i<N; i++)
-            //{
-            //    Console.WriteLine(i.ToString()+ "  "+ ln[i].ToString()+"    "+ln_[i].ToString()+"      "+ arr[2 * i + offset]+" "+ arr[2 * i + 1 + offset] +
-            //        "     "+ ((ln[i] - ln_[i]) * (ln[i] - ln_[i]) / (ln[i] > ln_[i] ? ln[i] : ln_[i])).ToString());
-            //}
-            //Console.WriteLine(hi2+ "\n");
+
             return hi2;
         }
         private double Hi2_256_sol(int[] arr,int offset)
@@ -309,7 +301,7 @@ namespace stego_app
                 case -1:
                     return ((c + 1) ^ 1 - 1);
             }
-            return (c);
+            return (-1);
         }
 
         private int Disc_func( byte[] block,int k, int[] mask)
@@ -477,9 +469,9 @@ namespace stego_app
                     arr_str[pixelout.G + 256]++;
                     arr_str[pixelout.B + 512]++;
                 }
-                hi2_str[j+0] = Hi2_128_sol(arr_str, 0);
-                hi2_str[j+Y] = Hi2_128_sol(arr_str, 256);
-                hi2_str[j+2*Y] = Hi2_128_sol(arr_str, 512);
+                hi2_str[j+0]   = ChiSquarePval(Hi2_128_sol(arr_str,   0),108);
+                hi2_str[j+Y]   = ChiSquarePval(Hi2_128_sol(arr_str, 256),108);
+                hi2_str[j+2*Y] = ChiSquarePval(Hi2_128_sol(arr_str, 512),108);
             }
 
             int base0 = (pictureBox2.Height - 20);
@@ -493,39 +485,26 @@ namespace stego_app
             pictureBox2.BackColor = Color.Black;
 
             int base1 = (pictureBox3.Height - 20);
-            int max_hi2 = Convert.ToInt32(hi2_str[0]);
+            double max_hi2 = Convert.ToInt32(hi2_str[0]);
             for (int i = 1; i < Y*3; i++)
             {
                 if (hi2_str[i] > max_hi2)
-                    max_hi2 = Convert.ToInt32(hi2_str[i]);
+                   // max_hi2 = Convert.ToInt32(hi2_str[i]);
+                max_hi2 = hi2_str[i];
             }
+            int min_hi2 = Convert.ToInt32(hi2_str[0]);
+
+            for (int i = 1; i < Y * 3; i++)
+            {
+                if (hi2_str[i] < min_hi2)
+                    min_hi2 = Convert.ToInt32(hi2_str[i]);
+            }
+            
             double scale_hi2 = (double)max_hi2 / base1;
             pictureBox3.BackColor = Color.Black;
 
-            //double hi2 = Hi2_128_sol(arr,0);
-            //double hi2_2=Hi2_256_sol(arr,0);
-            //double S = Integral(0,hi2);
-            //double P = 1.0 -  S;
-            //double PP = ChiSquarePval(hi2, 255);
 
-            //hi2_Red.Text = "Вероятность наличия вложения в канале Red = " + (PP).ToString();
-            //hi2_Red.Text = "Значение Chi2 по каналу Red = " + (hi2).ToString();
-
-
-
-            //hi2 = Hi2_128_sol(arr,256);
-            //S = Integral(0, hi2);
-            //P = 1.0 - S;
-            //PP = ChiSquarePval(hi2, 255);
-            //hi2_Green.Text = "Вероятность наличия вложения в канале Green = " + (PP).ToString();
-            //hi2_Green.Text = "Значение Chi2 по каналу Green = " + (hi2).ToString();
-
-            //hi2 = Hi2_128_sol(arr,512);
-            //S = Integral(0, hi2);
-            //P = 1.0 - S; Integral(0, hi2);
-            //PP = ChiSquarePval(hi2, 255);
-            //hi2_Blue.Text = "Вероятность наличия вложения в канале Blue = " + (PP).ToString();
-            //hi2_Blue.Text = "Значение Chi2 по каналу Blue = " + (hi2).ToString();
+           
 
             for (int i = 0; i < SIZE; i++)
             {
@@ -545,35 +524,38 @@ namespace stego_app
                 var color = (i < Y) ? Color.Red : (i < 2*Y) ? Color.LightGreen : (i < 3*Y) ?  Color.Blue: Color.Yellow;
                 //var color = (i < 256) ? Color.Red: (i < 512) ? Color.Green: Color.Blue;
                 //var color = Color.White;
-                histo_hi2.SetPixel(i + 10, base1 + 1 - (int)(hi2_str[i] / scale_hi2), color);
-                histo_hi2.SetPixel(i + 10 - 1, base1 + 1 - (int)(hi2_str[i] / scale_hi2), color);
-                histo_hi2.SetPixel(i + 10 + 1, base1 + 1 - (int)(hi2_str[i] / scale_hi2), color);
-                histo_hi2.SetPixel(i + 10, base1 + 1 - (int)(hi2_str[i] / scale_hi2) + 1, color);
+                int x = i + 10;
+                int y = base1 + 1 - (int)(hi2_str[i] / scale_hi2);
+                y = y < 0 ? 0 : y;
+                histo_hi2.SetPixel(i + 10, y, color);
+                histo_hi2.SetPixel(i + 10 - 1, y, color);
+                histo_hi2.SetPixel(i + 10 + 1, y, color);
+                histo_hi2.SetPixel(i + 10, y + 1, color);
                 if ((base1 + 1 - (int)(hi2_str[i] / scale_hi2) - 1) >0 )
-                        histo_hi2.SetPixel(i + 10, base1 + 1 - (int)(hi2_str[i] / scale_hi2) - 1, color);
+                        histo_hi2.SetPixel(i + 10,y - 1, color);
             }
             LogFile.tolog("Ending Hi-square analyse. Begin RS-analyse");
-            int[] mplus = { 0, 1, 1, 0 };
-            int[] mminus = { 0, -1, -1, 0 };
-            double p= Rs_attack(mplus,mminus);
-            labelP.Visible = true;
-            labelP1.Visible = true;
-            labelP2.Visible = true;
-            labelP3.Visible = true;
-            labelP.Text = "P (0,1,1,0) = " + p.ToString();
-            int[] mplus1 = { 1,0,0,1};
-            int[] mminus1 = { -1,0,0,-1 };
-            p = Rs_attack(mplus1, mminus1);
-            labelP1.Text = "P (1,0,0,1) = " + p.ToString();
-            int[] mplus2 = { 1, 0, 1, 0 };
-            int[] mminus2 = { -1, 0, -1, 0 };
-            p = Rs_attack(mplus2, mminus2);
-            labelP2.Text = "P (1,0,1,0) = " + p.ToString();
-            int[] mplus3 = { 0, 1, 0, 1 };
-            int[] mminus3 = { 0, -1, 0, 1 };
-            p = Rs_attack(mplus3, mminus3);
-            labelP3.Text = "P (0,1,0,1) = " + p.ToString();
-            LogFile.tolog("Ending RS-analyse");
+            //int[] mplus = { 0, 1, 1, 0 };
+            //int[] mminus = { 0, -1, -1, 0 };
+            //double p= Rs_attack(mplus,mminus);
+            //labelP.Visible = true;
+            //labelP1.Visible = true;
+            //labelP2.Visible = true;
+            //labelP3.Visible = true;
+            //labelP.Text = "P (0,1,1,0) = " + p.ToString();
+            //int[] mplus1 = { 1,0,0,1};
+            //int[] mminus1 = { -1,0,0,-1 };
+            //p = Rs_attack(mplus1, mminus1);
+            //labelP1.Text = "P (1,0,0,1) = " + p.ToString();
+            //int[] mplus2 = { 1, 0, 1, 0 };
+            //int[] mminus2 = { -1, 0, -1, 0 };
+            //p = Rs_attack(mplus2, mminus2);
+            //labelP2.Text = "P (1,0,1,0) = " + p.ToString();
+            //int[] mplus3 = { 0, 1, 0, 1 };
+            //int[] mminus3 = { 0, -1, 0, 1 };
+            //p = Rs_attack(mplus3, mminus3);
+            //labelP3.Text = "P (0,1,0,1) = " + p.ToString();
+            //LogFile.tolog("Ending RS-analyse");
         }
 
         
