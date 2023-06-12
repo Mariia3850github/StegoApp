@@ -249,7 +249,7 @@ namespace stego_app
             double[] ln_ = new double[N];
             Array.Clear(ln, 0, N);
             Array.Clear(ln_, 0, N);
-            int off = 10;
+            int off = 0;
             for (int k = 0 + off; k < N - off; k++)
             {
                 ln[k]  =  (double)arr[2 * k + offset];
@@ -469,9 +469,9 @@ namespace stego_app
                     arr_str[pixelout.G + 256]++;
                     arr_str[pixelout.B + 512]++;
                 }
-                hi2_str[j+0]   = ChiSquarePval(Hi2_128_sol(arr_str,   0),108);
-                hi2_str[j+Y]   = ChiSquarePval(Hi2_128_sol(arr_str, 256),108);
-                hi2_str[j+2*Y] = ChiSquarePval(Hi2_128_sol(arr_str, 512),108);
+                hi2_str[j+0]   = ChiSquarePval(Hi2_128_sol(arr_str,   0),128);
+                hi2_str[j+Y]   = ChiSquarePval(Hi2_128_sol(arr_str, 256),128);
+                hi2_str[j+2*Y] = ChiSquarePval(Hi2_128_sol(arr_str, 512),128);
             }
 
             int base0 = (pictureBox2.Height - 20);
@@ -535,27 +535,27 @@ namespace stego_app
                         histo_hi2.SetPixel(i + 10,y - 1, color);
             }
             LogFile.tolog("Ending Hi-square analyse. Begin RS-analyse");
-            //int[] mplus = { 0, 1, 1, 0 };
-            //int[] mminus = { 0, -1, -1, 0 };
-            //double p= Rs_attack(mplus,mminus);
-            //labelP.Visible = true;
-            //labelP1.Visible = true;
-            //labelP2.Visible = true;
-            //labelP3.Visible = true;
-            //labelP.Text = "P (0,1,1,0) = " + p.ToString();
-            //int[] mplus1 = { 1,0,0,1};
-            //int[] mminus1 = { -1,0,0,-1 };
-            //p = Rs_attack(mplus1, mminus1);
-            //labelP1.Text = "P (1,0,0,1) = " + p.ToString();
-            //int[] mplus2 = { 1, 0, 1, 0 };
-            //int[] mminus2 = { -1, 0, -1, 0 };
-            //p = Rs_attack(mplus2, mminus2);
-            //labelP2.Text = "P (1,0,1,0) = " + p.ToString();
-            //int[] mplus3 = { 0, 1, 0, 1 };
-            //int[] mminus3 = { 0, -1, 0, 1 };
-            //p = Rs_attack(mplus3, mminus3);
-            //labelP3.Text = "P (0,1,0,1) = " + p.ToString();
-            //LogFile.tolog("Ending RS-analyse");
+            int[] mplus = { 0, 1, 1, 0 };
+            int[] mminus = { 0, -1, -1, 0 };
+            double p = Rs_attack(mplus, mminus);
+            labelP.Visible = true;
+            labelP1.Visible = true;
+            labelP2.Visible = true;
+            labelP3.Visible = true;
+            labelP.Text = "P (0,1,1,0) = " + p.ToString();
+            int[] mplus1 = { 1, 0, 0, 1 };
+            int[] mminus1 = { -1, 0, 0, -1 };
+            p = Rs_attack(mplus1, mminus1);
+            labelP1.Text = "P (1,0,0,1) = " + p.ToString();
+            int[] mplus2 = { 1, 0, 1, 0 };
+            int[] mminus2 = { -1, 0, -1, 0 };
+            p = Rs_attack(mplus2, mminus2);
+            labelP2.Text = "P (1,0,1,0) = " + p.ToString();
+            int[] mplus3 = { 0, 1, 0, 1 };
+            int[] mminus3 = { 0, -1, 0, 1 };
+            p = Rs_attack(mplus3, mminus3);
+            labelP3.Text = "P (0,1,0,1) = " + p.ToString();
+            LogFile.tolog("Ending RS-analyse");
         }
 
         
